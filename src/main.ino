@@ -10,6 +10,10 @@
 #define C   A2
 #define D   A3
 
+// Similar to F(), but for PROGMEM string pointers rather than literals
+#define F2(progmem_ptr) (const __FlashStringHelper *)progmem_ptr
+
+
 RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 32);
 
 uint16_t green = matrix.Color333(0,2,0);
@@ -88,13 +92,16 @@ static const unsigned char PROGMEM rightFoot[] = {
   B11111100
 };
 
+const char str[] PROGMEM = "Happy Birthday - in the most sarcastic sense of the term";
 
-void setup() {
-  // uint8_t *ptr = matrix.backBuffer(); // Get address of matrix data
-  // memcpy_P(ptr, img, sizeof(img));
-  
+int textX = matrix.width();
+int textMin = sizeof(str) * -12;
+int hue = 0;
+
+void setup() {   
   matrix.begin();
-  
+  matrix.setTextWrap(false); // Allow text to run off right edge
+  matrix.setTextSize(2);
 }
 
 void drawErr(uint8_t  xOffset = 0, uint8_t yOffset = 0) {
@@ -177,29 +184,47 @@ void loop() {
   int switchCharacter = 1;
   
   for(;;){
+    matrix.fillScreen(0);
     counter++;
-    if (counter == 4) {
+
+    //
+    // matrix.setTextColor(matrix.ColorHSV(hue, 255, 255, true));
+    // matrix.setCursor(textX, 8);
+    // matrix.print(F2(str));
+    //
+    // if((--textX) < textMin) {
+      switchCharacter > 0 ? drawErr(3, 5) : drawIgnignot(3, 5);
+      delay(5000);
+    //   textX = matrix.width();
+    // }
+    // hue += 7;
+    // if(hue >= 1536) hue -= 1536;
+    //
+    // // Update display
+    matrix.swapBuffers(false);
+
+    if (counter == 1) {
       switchCharacter = switchCharacter * -1;
       counter = 0;
     }
-    if (x > 5) {
-      xMove = -1;
-    }
-    if (y > 7) {
-      yMove = -1;
-    }
-    if (x < 1) {
-      xMove = 1;
-    }
-    if (y < 1) {
-      yMove = 1;
-    }
-    x = x + xMove;
-    y = y + yMove;
-    matrix.fillRect(0,0,32,32,black);
+    
+    // if (x > 5) {
+    //   xMove = -1;
+    // }
+    // if (y > 7) {
+    //   yMove = -1;
+    // }
+    // if (x < 1) {
+    //   xMove = 1;
+    // }
+    // if (y < 1) {
+    //   yMove = 1;
+    // }
+    // x = x + xMove;
+    // y = y + yMove;
+    
     // drawIgnignot(x, y);
-    switchCharacter > 0 ? drawErr(x, y) : drawIgnignot(x, y);
-    delay(2000);
+    // delay(2000);
   }
 }
 
